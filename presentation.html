@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Cluster-Analyse</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Dipl.-Psych. Yannik Paul" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <script src="libs/kePrint/kePrint.js"></script>
+    <link href="libs/lightable/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+    <link rel="stylesheet" href="my-style.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: left, top, title-slide
+
+.title[
+# Cluster-Analyse
+]
+.subtitle[
+## eine Einführung mit vier Anwendungsfällen
+]
+.author[
+### Dipl.-Psych. Yannik Paul
+]
+.institute[
+### Christian-Albrechts-University Kiel
+]
+.date[
+### 03.12.2022
+]
+
+---
+
+
+
+
+
+
+
+
+<div>
+<style type="text/css">.xaringan-extra-logo {
+width: 180px;
+height: 60px;
+z-index: 0;
+background-image: url(logo.png);
+background-size: contain;
+background-repeat: no-repeat;
+position: absolute;
+top:0em;right:0em;
+}
+</style>
+<script>(function () {
+  let tries = 0
+  function addLogo () {
+    if (typeof slideshow === 'undefined') {
+      tries += 1
+      if (tries < 10) {
+        setTimeout(addLogo, 100)
+      }
+    } else {
+      document.querySelectorAll('.remark-slide-content:not(.title-slide):not(.inverse):not(.hide_logo)')
+        .forEach(function (slide) {
+          const logo = document.createElement('div')
+          logo.classList = 'xaringan-extra-logo'
+          logo.href = null
+          slide.appendChild(logo)
+        })
+    }
+  }
+  document.addEventListener('DOMContentLoaded', addLogo)
+})()</script>
+</div>
+
+
+
+
+
+
+# Clusteranalyse
+- K-Means Clustering
+  + Beispiel Schwertlilien
+- (Agglomerative) Hierarchical Clustering
+  + Beispiel Big-Five Personality
+
+
+---
+# Faktoranalyse
+
+![Factor-Analysis](pics/factor_analysis.png)
+
+---
+# Faktoranalyse
+
+- Fasst für uns **Variablen** zu **latenten Faktoren** zusammen
+  + Fragebögen
+  + Gruppen an Symptomen zu Symptomdimensionen
+  + Transdiagnostische Faktoren?
+- Aber was tun, wenn wir nicht Variablen, sondern Personen in Gruppen aufteilen wollen?
+  + machen wir in der klinischen Psychologie ganz automatisch mit Diagnosen
+  + aber auch andere Subgruppen können uns interessieren
+- Was ist wenn wir gar nicht wissen:
+  + ob es Subgruppen gibt
+  + durch welche Werte auf welchen Variablen sie sich auszeichnen
+  + ...
+
+.center[
+**Lösung: Cluster-Analysen sind die _umgedrehte_ Variante von Faktor-Analysen!**
+]
+
+---
+# Cluster Analyse
+
+- eigentlich eine Methode aus der Data-Science
+  + manchmal auch *unsupervised machine learning*
+- viele verschiedene Varianten, wir lernen heute kennen:
+  + K-Means Clustering
+  + Hierarchical Clustering
+- Cluster-Analysen beantworten uns:
+  + Wie viele Gruppen gibt es unter meinen Personen?
+  + Welcher Gruppe ist jede Person zugehörig?
+  + In welche Gruppe kommt eine Person, wenn ich sie neu meinen Daten hinzufüge?
+
+
+
+
+---
+class: inverse, center
+
+# K-Means Cluster-Analyse
+
+---
+# K-Means Clustering
+
+.center[
+*Idee: Zentroide als __Clusterzentrum__*
+]
+
+Sei `\(m\)` die Anzahl an Variablen und `\(k\)` die Anzahl an Cluster:
+
+- Schritt 1: Für einen Datensatz mit `\(m\)` Variablen male einen `\(m\)`-dimensionalen Raum auf
+- Schritt 2: Male alle Datenpunkte in diesen `\(m\)`-dimensionalen Raum
+- Schritt 3: Male zufällig `\(k\)` Zentroide in diesen Graphen
+- Schritt 4: Bestimme für jeden Punkt den euklidischen Abstand zu jedem Zentroid - der Punkt gehört ab jetzt zu dem Zentroiden, wo der Abstand am kürzesten ist
+- Schritt 5: Berechne für jeden so entstandenen Cluster den Zentroiden als Mittelpunkt aller Punkte des Clusters
+
+**Wiederhole bis Konvergenz erreicht ist (SS verändert sich nicht mehr)**
+
+
+
+---
+# Visualisierung
+
+&lt;iframe src="https://www.naftaliharris.com/blog/visualizing-k-means-clustering/" width="100%" height="400px" data-external="1"&gt;&lt;/iframe&gt;
+
+
+---
+# Anzahl an Clustern?
+
+- Schön und gut, aber wie bestimme ich die Anzahl an Clustern?
+
+**Antwort: Scree-Plot**
+- Vorgehen:
+  + K-Means Clustering für 1-Cluster-Lösung, 2-Cluster-Lösung, 3-Cluster-Lösung...
+  + Mehrmals!
+  + Goodness of fit für jede Lösung berechnen: `\(\textit{SS}_{\textit{within}} = \Sigma^K_{k=1} \Sigma_{x_i \in C_k} (x_i - \mu_k)^2\)`
+  + in einem Plot darstellen
+
+*Auch möglich: Gap-Statistic, Average Silhouette*
+
+
+
+---
+# Scree-Plot
+
+&lt;img src="presentation_files/figure-html/unnamed-chunk-2-1.png" width="504" /&gt;
+
+---
+class: inverse, center
+# Beispiel: Schwertlilien
+
+---
+# Datensatz
+
+- Datensatz `iris`, Standard-R Beispieldatensatz
+- drei verschiedene Arten von Schwertlilien
+- angegeben jeweils:
+  + Blütenblätterbreite, Blütenblätterlänge
+  + Kelchblattlänge, Kelchblattbreite
+- insgesamt `\(n=150\)` Planzen erhoben
+
+
+
+
+---
+# Datensatz
+
+
+| Sepal.Length| Sepal.Width| Petal.Length| Petal.Width|Species |
+|------------:|-----------:|------------:|-----------:|:-------|
+|          5.1|         3.5|          1.4|         0.2|setosa  |
+|          4.9|         3.0|          1.4|         0.2|setosa  |
+|          4.7|         3.2|          1.3|         0.2|setosa  |
+|          4.6|         3.1|          1.5|         0.2|setosa  |
+|          5.0|         3.6|          1.4|         0.2|setosa  |
+|          5.4|         3.9|          1.7|         0.4|setosa  |
+
+
+
+---
+# Scree-Plot
+
+.center[
+&lt;img src="presentation_files/figure-html/unnamed-chunk-4-1.png" width="504" /&gt;
+]
+
+---
+# Ergebnisse
+
+
+
+.center[
+&lt;img src="presentation_files/figure-html/unnamed-chunk-6-1.png" width="504" /&gt;
+]
+
+
+---
+# Ergebnisse
+.center[
+&lt;img src="presentation_files/figure-html/unnamed-chunk-7-1.png" width="504" /&gt;
+]
+
+---
+# Ergebnisse
+.center[
+&lt;img src="presentation_files/figure-html/unnamed-chunk-8-1.png" width="504" /&gt;
+]
+
+
+---
+# Ergebnisse
+.center[
+&lt;img src="presentation_files/figure-html/unnamed-chunk-9-1.png" width="504" /&gt;
+]
+
+---
+# Ergebnisse
+
+- Replikation der "echten" Clusterung!
+- Aber natürlich besonders dann interessant, wenn wir nicht wissen ob/welche Cluster es gibt
+- kann aber auch validierend sein für die Aufteilung
+
+
+
+---
+class: inverse, center
+
+# Hierarchisches Clustering
+
+---
+# Hierarchisches Clustering
+
+- Jeder Datenpunkt (=Jede Person) startet in ihrem eigenen Cluster
+  + also haben wir am Anfang `\(k=n\)` Cluster!
+- Danach berechnen wir für jede Kombination von  Cluster deren Abstand
+  + bspw. mit euklidischer Distanz `\(d(p,q)= |p-q|\)`
+- Jetzt fassen wir jeweils die beiden Paare zu einem neuen Cluster zusammen, die sich am nächsten sind
+  + jetzt also `\(\frac{n}{2}=k\)` Cluster
+- Wiederholen bis nur noch ein Gesamtcluster
+  + Berechnung von Distanz zwischen Clustern unterschiedlich, gängig ist Ward's Method, die Varianz zwischen Clustern minimiert
+- Den so entstanden Baum dann an gewünschter Stelle "abschneiden"
+
+
+---
+# Tree-Diagram
+.center[
+&lt;img src="presentation_files/figure-html/unnamed-chunk-10-1.png" width="504" /&gt;
+]
+---
+# Iris
+
+
+.center[
+&lt;img src="presentation_files/figure-html/unnamed-chunk-11-1.png" width="504" /&gt;
+]
+
+
+
+---
+class: inverse, center
+# Beispiel: Tumordaten
+
+
+---
+# Beispiel Tumordaten
+
+- [Datensatz](https://www.kaggle.com/datasets/uciml/breast-cancer-wisconsin-data) von 568 verschiedenen Tumoren von Brustkrebspatient:innen
+  + Klassifizierung in bösartig, gutartig
+- 31 Variablen (Radius, Kompaktheit, Symmetry, Textur...)
+
+---
+# Beispiel Tumordaten
+
+&lt;div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:100%; "&gt;&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; id &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; diagnosis &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; radius_mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; texture_mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; perimeter_mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; area_mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; smoothness_mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; compactness_mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; concavity_mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; concave points_mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; symmetry_mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; fractal_dimension_mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; radius_se &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; texture_se &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; perimeter_se &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; area_se &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; smoothness_se &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; compactness_se &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; concavity_se &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; concave points_se &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; symmetry_se &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; fractal_dimension_se &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; radius_worst &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; texture_worst &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; perimeter_worst &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; area_worst &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; smoothness_worst &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; compactness_worst &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; concavity_worst &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; concave points_worst &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; symmetry_worst &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; fractal_dimension_worst &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; ...33 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 842302 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; M &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 17.99 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10.38 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 122.80 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1001.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.11840 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.27760 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3001 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.14710 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2419 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.07871 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0950 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.9053 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.589 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 153.40 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.006399 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.04904 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.05373 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.01587 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.03003 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.006193 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25.38 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 17.33 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 184.60 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2019.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1622 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.6656 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.7119 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2654 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4601 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.11890 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 842517 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; M &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.57 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 17.77 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 132.90 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1326.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.08474 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.07864 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0869 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.07017 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1812 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.05667 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5435 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.7339 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.398 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 74.08 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.005225 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.01308 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.01860 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.01340 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.01389 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.003532 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24.99 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 23.41 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 158.80 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1956.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1238 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1866 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2416 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1860 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2750 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.08902 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 84300903 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; M &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 19.69 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 21.25 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 130.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1203.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.10960 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.15990 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1974 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.12790 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2069 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.05999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.7456 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.7869 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.585 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 94.03 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.006150 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.04006 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.03832 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.02058 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.02250 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.004571 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 23.57 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25.53 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 152.50 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1709.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1444 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4245 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4504 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2430 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3613 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.08758 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 84348301 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; M &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11.42 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.38 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 77.58 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 386.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.14250 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.28390 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2414 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.10520 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2597 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.09744 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4956 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.1560 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.445 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27.23 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.009110 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.07458 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.05661 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.01867 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.05963 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.009208 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14.91 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26.50 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 98.87 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 567.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2098 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.8663 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.6869 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2575 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.6638 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.17300 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 84358402 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; M &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.29 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14.34 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 135.10 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1297.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.10030 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.13280 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1980 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.10430 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1809 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.05883 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.7572 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.7813 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5.438 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 94.44 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.011490 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.02461 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.05688 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.01885 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.01756 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.005115 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 22.54 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 16.67 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 152.20 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1575.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1374 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2050 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1625 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2364 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.07678 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 843786 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; M &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.45 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 15.70 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 82.57 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 477.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.12780 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.17000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1578 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.08089 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2087 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.07613 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3345 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.8902 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.217 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27.19 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.007510 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.03345 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.03672 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.01137 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.02165 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.005082 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 15.47 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 23.75 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 103.40 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 741.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1791 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5249 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5355 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1741 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3985 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.12440 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;&lt;/div&gt;
+
+
+---
+# Wie viele Cluster?
+
+.center[
+&lt;img src="presentation_files/figure-html/unnamed-chunk-13-1.png" width="504" /&gt;
+]
+---
+# Clustering
+
+.center[
+&lt;img src="presentation_files/figure-html/unnamed-chunk-14-1.png" width="504" /&gt;
+
+]
+
+---
+# Clustering
+
+.center[
+&lt;img src="presentation_files/figure-html/unnamed-chunk-15-1.png" width="504" /&gt;
+]
+
+
+
+---
+# Clustering
+
+.center[
+&lt;img src="presentation_files/figure-html/unnamed-chunk-16-1.png" width="504" /&gt;
+]
+
+
+
+
+---
+# 3-Cluster Lösung
+
+.center[
+&lt;img src="presentation_files/figure-html/unnamed-chunk-17-1.png" width="504" /&gt;
+]
+
+---
+class: inverse, center
+
+# Takeaway
+
+
+---
+# Takeaway
+
+- Cluster-Analysen können Beobachtungen (Proband:innen) in Gruppen aufteilen die inhaltlich bedeutsam sind
+- **Vorteile:**
+  + Skalieren von wenig Daten auf Millionen von Datenpunkten
+  + Weitesgehend verteilungsfrei und ohne Voraussetzungen
+- **Nachteile:**
+  + Garbage-In -  Garbage-Out
+  + Bei klassischen psychologischen Variablen Tendenz zu Clustern in Hoch-Niedrig
+
+- Es gibt noch weitere Clustering Methoden
+  + Beispiel: Density-based Clustering (DBSCAN)
+
+
+---
+class: inverse, center
+
+# Fragen?
+
+
+---
+class: inverse, center
+
+# Danke!
+
+
+---
+class: inverse, center
+
+# Bonus: Fehlgeschlagene Big-Five-Cluster-Analyse
+
+
+---
+# Datensatz
+
+- (↗ Datensatz)[https://www.kaggle.com/datasets/tunguz/big-five-personality-test] von Big-Five Persönlichkeitsfragen (Open Psychometrics)
+  + Version nach Goldberg et al. (1992)
+- über eine Millionen ausgefüllte Fragebögen
+- für dieses Beispiel resample mit `\(n=5000\)`
+
+.center[
+**Finden wir Subgruppen und wenn ja wodurch sind diese ausgezeichnet?**
+]
+
+
+
+---
+# Screeplot
+
+
+&lt;img src="presentation_files/figure-html/unnamed-chunk-18-1.png" width="504" /&gt;
+
+
+**Cluster-Lösung erzwingen! - 8? 16?**
+
+
+---
+# Clustering 
+
+
+&lt;img src="presentation_files/figure-html/unnamed-chunk-19-1.png" width="504" /&gt;
+
+
+---
+
+&lt;img src="presentation_files/figure-html/unnamed-chunk-20-1.png" width="504" /&gt;
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
